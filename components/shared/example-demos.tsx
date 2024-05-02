@@ -300,31 +300,6 @@ const demos = [
     ),
   },
   {
-    title: turboIntegrations.pooltogether_v4.name,
-    description: turboIntegrations.pooltogether_v4.description,
-    href: turboIntegrations.pooltogether_v4.href,
-    demo: (
-      <div className="flex items-center justify-center space-x-20">
-        <IsLightTheme>
-          <Image
-            alt="PoolTogether logo"
-            height={100}
-            src={turboIntegrations.pooltogether_v4.imgDark}
-            width={100}
-          />
-        </IsLightTheme>
-        <IsDarkTheme>
-          <Image
-            alt="PoolTogether logo"
-            height={100}
-            src={turboIntegrations.pooltogether_v4.imgLight}
-            width={100}
-          />
-        </IsDarkTheme>
-      </div>
-    ),
-  },
-  {
     title: turboIntegrations.livepeer.name,
     description: turboIntegrations.livepeer.description,
     href: turboIntegrations.livepeer.href,

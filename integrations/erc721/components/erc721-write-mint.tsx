@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError } from "viem"
-import { Address, useWaitForTransaction } from "wagmi"
+import { type Address, type BaseError } from "viem"
+import { useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -9,8 +9,8 @@ import { ContractWriteButton } from "@/components/blockchain/contract-write-butt
 import { TransactionStatus } from "@/components/blockchain/transaction-status"
 
 import {
-  useErc721SafeMint,
-  usePrepareErc721SafeMint,
+  useSimulateErc721SafeMint,
+  useWriteErc721SafeMint,
 } from "../generated/erc721-wagmi"
 
 interface Erc721WriteMintProps {
@@ -30,25 +30,30 @@ export function Erc721WriteMint({ address }: Erc721WriteMintProps) {
   const debouncedTokenId = useDebounce(watch("tokenId"), 500)
   const debouncedTokenUri = useDebounce(watch("tokenUri"), 500)
 
-  const { config, error, isError } = usePrepareErc721SafeMint({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc721SafeMint({
     address,
     args:
       debouncedToAddress && debouncedTokenId && debouncedTokenUri
         ? [debouncedToAddress, BigInt(debouncedTokenId || 0), debouncedTokenUri]
         : undefined,
-    enabled: Boolean(
-      debouncedToAddress && debouncedTokenId && debouncedTokenUri
-    ),
   })
 
-  const { data, write, isLoading: isLoadingWrite } = useErc721SafeMint(config)
+  const {
+    data,
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc721SafeMint()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -66,13 +71,13 @@ export function Erc721WriteMint({ address }: Erc721WriteMintProps) {
             isLoadingWrite={isLoadingWrite}
             loadingTxText="Minting..."
             type="submit"
-            write={!!write}
+            write={!!writeContract}
           >
             Mint
           </ContractWriteButton>
           <TransactionStatus
             error={error as BaseError}
-            hash={data?.hash}
+            hash={data}
             isError={isError}
             isLoadingTx={isLoadingTx}
             isSuccess={isSuccess}

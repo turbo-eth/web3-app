@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError } from "viem"
-import { Address, useAccount, useWaitForTransaction } from "wagmi"
+import { type Address, type BaseError } from "viem"
+import { useAccount, useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -9,8 +9,8 @@ import { ContractWriteButton } from "@/components/blockchain/contract-write-butt
 import { TransactionStatus } from "@/components/blockchain/transaction-status"
 
 import {
-  useErc1155SafeTransferFrom,
-  usePrepareErc1155SafeTransferFrom,
+  useSimulateErc1155SafeTransferFrom,
+  useWriteErc1155SafeTransferFrom,
 } from "../generated/erc1155-wagmi"
 
 interface Erc1155WriteTransferProps {
@@ -36,7 +36,11 @@ export function Erc1155WriteTransfer({ address }: Erc1155WriteTransferProps) {
     ? debouncedFromAddress
     : accountAddress
 
-  const { config, error, isError } = usePrepareErc1155SafeTransferFrom({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc1155SafeTransferFrom({
     address,
     args:
       transferFromAddress && debouncedToAddress && debouncedTokenId
@@ -48,23 +52,20 @@ export function Erc1155WriteTransfer({ address }: Erc1155WriteTransferProps) {
             "0x",
           ]
         : undefined,
-    enabled: Boolean(
-      transferFromAddress && debouncedToAddress && debouncedTokenId
-    ),
   })
 
   const {
     data,
-    write,
-    isLoading: isLoadingWrite,
-  } = useErc1155SafeTransferFrom(config)
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc1155SafeTransferFrom()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -98,13 +99,13 @@ export function Erc1155WriteTransfer({ address }: Erc1155WriteTransferProps) {
             isLoadingWrite={isLoadingWrite}
             loadingTxText="Transferring..."
             type="submit"
-            write={!!write}
+            write={!!writeContract}
           >
             Transfer
           </ContractWriteButton>
           <TransactionStatus
             error={error as BaseError}
-            hash={data?.hash}
+            hash={data}
             isError={isError}
             isLoadingTx={isLoadingTx}
             isSuccess={isSuccess}

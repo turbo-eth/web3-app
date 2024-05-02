@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { Address } from "wagmi"
+import type { Address } from "viem"
 
 import { Profile } from "../../utils/types"
 

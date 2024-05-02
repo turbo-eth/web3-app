@@ -1,13 +1,13 @@
 import { SiweMessage } from "siwe"
-import type { Address } from "wagmi"
-import { SignMessageArgs } from "wagmi/dist/actions"
+import { type Address } from "viem"
+import { SignMessageMutateAsync } from "wagmi/query"
 
 import { siteConfig } from "@/config/site"
 
 interface SiweMessageOptions {
   address: string
   chainId: number
-  signMessageAsync: (args?: SignMessageArgs | undefined) => Promise<Address>
+  signMessageAsync: SignMessageMutateAsync<any>
 }
 
 /**

@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError } from "viem"
-import { Address, useWaitForTransaction } from "wagmi"
+import { type Address, type BaseError } from "viem"
+import { useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -9,8 +9,8 @@ import { ContractWriteButton } from "@/components/blockchain/contract-write-butt
 import { TransactionStatus } from "@/components/blockchain/transaction-status"
 
 import {
-  useErc1155Mint,
-  usePrepareErc1155Mint,
+  useSimulateErc1155Mint,
+  useWriteErc1155Mint,
 } from "../generated/erc1155-wagmi"
 
 interface Erc1155WriteMintProps {
@@ -36,7 +36,11 @@ export function Erc1155WriteMint({ address }: Erc1155WriteMintProps) {
   const debouncedTokenAmount = useDebounce(watchTokenAmount, 500)
   const debouncedUri = useDebounce(watchUri, 500)
 
-  const { config, error, isError } = usePrepareErc1155Mint({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc1155Mint({
     address,
     args:
       debouncedToAddress &&
@@ -50,22 +54,20 @@ export function Erc1155WriteMint({ address }: Erc1155WriteMintProps) {
             debouncedUri,
           ]
         : undefined,
-    enabled: Boolean(
-      debouncedToAddress &&
-        debouncedTokenId &&
-        debouncedTokenAmount &&
-        debouncedUri
-    ),
   })
 
-  const { data, write, isLoading: isLoadingWrite } = useErc1155Mint(config)
+  const {
+    data,
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc1155Mint()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -89,13 +91,13 @@ export function Erc1155WriteMint({ address }: Erc1155WriteMintProps) {
             isLoadingWrite={isLoadingWrite}
             loadingTxText="Minting..."
             type="submit"
-            write={!!write}
+            write={!!writeContract}
           >
             Mint
           </ContractWriteButton>
           <TransactionStatus
             error={error as BaseError}
-            hash={data?.hash}
+            hash={data}
             isError={
               isError && Boolean(debouncedTokenId && debouncedTokenAmount)
             }

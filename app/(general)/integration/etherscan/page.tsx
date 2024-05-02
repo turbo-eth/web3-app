@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { turboIntegrations } from "@/data/turbo-integrations"
 import { LuBook } from "react-icons/lu"
-import { useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -26,7 +26,7 @@ import { IsSignedIn } from "@/integrations/siwe/components/is-signed-in"
 import { IsSignedOut } from "@/integrations/siwe/components/is-signed-out"
 
 export default function EtherscanPage() {
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
   const { isLoading, data } = useEtherscanAccountTransactions({
     chainId: chain?.id || 1,
   })

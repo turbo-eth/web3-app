@@ -77,6 +77,7 @@ export const useSubmitPassport = () => {
   useEffect(() => {
     if (signMessageMutation.error ?? signMessageMutation.error)
       handleToast(
+        // @ts-ignore
         String(signMessageMutation.error ?? signMessageMutation.error)
       )
   }, [signMessageMutation.error, signMessageMutation.error])
@@ -84,6 +85,6 @@ export const useSubmitPassport = () => {
   return {
     submitPassport,
     isLoading:
-      signMessageMutation.isLoading || submitPassportMutation.isLoading,
+      signMessageMutation.isPending || submitPassportMutation.isPending,
   }
 }

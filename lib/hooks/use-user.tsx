@@ -11,7 +11,8 @@ interface User {
 }
 
 export function useUser({ redirectTo = "", redirectIfFound = false } = {}) {
-  const { data: user, refetch: mutateUser } = useQuery<User>(["user"], {
+  const { data: user, refetch: mutateUser } = useQuery<User>({
+    queryKey: ["user"],
     queryFn: () => fetch("/api/app/user").then((res) => res.json()),
   })
 

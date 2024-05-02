@@ -39,7 +39,7 @@ interface UseCurrentTokenPriceProps extends QueryOptions {
 export function useCurrentTokenPrice({
   coins,
   searchWidth = DEFAULT_SEARCH_WIDTH,
-  cacheTime = DEFAULT_CACHE_TIME,
+  gcTime = DEFAULT_CACHE_TIME,
   enabled,
   ...options
 }: UseCurrentTokenPriceProps) {
@@ -74,7 +74,8 @@ export function useCurrentTokenPrice({
     }
   }
 
-  return useQuery(["defi-llama", "current-price", coins, searchWidth], {
+  return useQuery({
+    queryKey: ["defi-llama", "current-price", coins, searchWidth],
     queryFn: fetcher,
     enabled: !!coins && enabled,
     ...options,

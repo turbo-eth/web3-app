@@ -5,7 +5,8 @@ import { useGelatoAutomateSdk } from "./use-automate-sdk"
 export const useMsgSender = () => {
   const { automateSdk } = useGelatoAutomateSdk()
 
-  return useQuery(["msg-sender", automateSdk], {
+  return useQuery({
+    queryKey: ["msg-sender", automateSdk],
     queryFn: () => {
       return automateSdk?.getDedicatedMsgSender()
     },

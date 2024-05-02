@@ -15,7 +15,8 @@ export function useGetTransactionVerbose({
   transactionHash,
   enabled,
 }: GetTransactionVerboseArgs) {
-  return useQuery(["get-transaction-verbose", chain, transactionHash], {
+  return useQuery({
+    queryKey: ["get-transaction-verbose", chain, transactionHash],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/transaction/getTransactionVerbose?chain=${chain}&transactionHash=${transactionHash}&format=result`
@@ -36,7 +37,8 @@ export function useGetTransactionVerboseRaw({
   transactionHash,
   enabled,
 }: GetTransactionVerboseArgs) {
-  return useQuery(["get-transaction-verbose-raw", chain, transactionHash], {
+  return useQuery({
+    queryKey: ["get-transaction-verbose-raw", chain, transactionHash],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/transaction/getTransactionVerbose?chain=${chain}&transactionHash=${transactionHash}&format=raw`

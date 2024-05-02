@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { useNetwork, useSwitchNetwork } from "wagmi"
+import { useAccount, useSwitchChain } from "wagmi"
 
 import { FADE_DOWN_ANIMATION_VARIANTS } from "@/config/design"
 import {
@@ -18,8 +18,8 @@ import { marketsData } from "../utils/market-config"
 import { HealthFactor } from "./health-factor"
 
 export const GeneralInfo = () => {
-  const { chain } = useNetwork()
-  const { switchNetwork } = useSwitchNetwork()
+  const { chain } = useAccount()
+  const { switchChain } = useSwitchChain()
 
   const { balanceInUsd, totalDebtInUsd, healthFactor, averageNetApy } =
     useAave()
@@ -37,7 +37,7 @@ export const GeneralInfo = () => {
           <div className="flex w-60 flex-col ">
             <Select
               value={chain?.id.toString()}
-              onValueChange={(e) => switchNetwork?.(+e)}
+              onValueChange={(e) => switchChain?.({ chainId: Number(e) })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select market" />

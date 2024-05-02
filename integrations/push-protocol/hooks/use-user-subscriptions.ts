@@ -17,7 +17,8 @@ export const useUserSubscriptions = ({
   env,
   user,
 }: UseUserSubscriptionProps) => {
-  return useQuery(["user-subscriptions", env, user], {
+  return useQuery({
+    queryKey: ["user-subscriptions", env, user],
     queryFn: () => fetchUserSubscriptions({ env, user }),
     refetchOnWindowFocus: false,
   })

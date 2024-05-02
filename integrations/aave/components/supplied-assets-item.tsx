@@ -4,9 +4,12 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { TiArrowRight } from "react-icons/ti"
 import { parseUnits } from "viem"
-import { useAccount, useWaitForTransaction } from "wagmi"
+import { useAccount, useWaitForTransactionReceipt } from "wagmi"
 
-import { useErc20Decimals, useErc20Symbol } from "@/lib/generated/blockchain"
+import {
+  useReadErc20Decimals,
+  useReadErc20Symbol,
+} from "@/lib/generated/blockchain"
 import { useToast } from "@/lib/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,8 +23,8 @@ import { Switch } from "@/components/ui/switch"
 import { ContractWriteButton } from "@/components/blockchain/contract-write-button"
 
 import {
-  usePoolSetUserUseReserveAsCollateral,
-  usePoolWithdraw,
+  useWritePoolSetUserUseReserveAsCollateral,
+  useWritePoolWithdraw,
 } from "../generated/aave-wagmi"
 import { useAave } from "../hooks/use-aave"
 
@@ -46,8 +49,8 @@ export const SuppliedAssetsItem = ({
   const { address: user } = useAccount()
   const { poolAddress } = useAave()
 
-  const symbol = getSymbol(useErc20Symbol({ address }).data)
-  const { data: decimals } = useErc20Decimals({ address })
+  const symbol = getSymbol(useReadErc20Symbol({ address }).data)
+  const { data: decimals } = useReadErc20Decimals({ address })
 
   const [withdrawAmount, setWithdrawAmount] = useState("")
   const [open, setOpen] = useState(false)
@@ -63,11 +66,17 @@ export const SuppliedAssetsItem = ({
   }
 
   const switchCollateralUsage = () => {
-    writeSetUserUseReserveAsCollateral()
+    writeSetUserUseReserveAsCollateral({
+      address: poolAddress,
+      args: [address, !collateralEnabled],
+    })
   }
 
   const buttonAction = () => {
-    withdrawWrite()
+    withdrawWrite({
+      address: poolAddress,
+      args: [address, getWithdrawAmount(), user as `0x${string}`],
+    })
   }
 
   const getWithdrawAmount = () => {
@@ -76,25 +85,19 @@ export const SuppliedAssetsItem = ({
 
   const {
     error: setUserUseReserveAsCollateralError,
-    write: writeSetUserUseReserveAsCollateral,
-  } = usePoolSetUserUseReserveAsCollateral({
-    address: poolAddress,
-    args: [address, !collateralEnabled],
-  })
+    writeContract: writeSetUserUseReserveAsCollateral,
+  } = useWritePoolSetUserUseReserveAsCollateral()
 
   const {
     error: withdrawError,
     data: data,
-    isLoading: isLoadingWrite,
-    write: withdrawWrite,
-  } = usePoolWithdraw({
-    address: poolAddress,
-    args: [address, getWithdrawAmount(), user as `0x${string}`],
-  })
+    isPending: isLoadingWrite,
+    writeContract: withdrawWrite,
+  } = useWritePoolWithdraw()
 
   const { isLoading: isLoadingTx, isSuccess: isSuccessTx } =
-    useWaitForTransaction({
-      hash: data?.hash,
+    useWaitForTransactionReceipt({
+      hash: data,
     })
 
   const setMaxAmount = () => setWithdrawAmount(balance.toString())

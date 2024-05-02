@@ -15,7 +15,8 @@ export function useGetTransaction({
   transactionHash,
   enabled,
 }: GetTransactionArgs) {
-  return useQuery(["get-transaction", chain, transactionHash], {
+  return useQuery({
+    queryKey: ["get-transaction", chain, transactionHash],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/transaction/getTransaction?chain=${chain}&transactionHash=${transactionHash}&format=result`
@@ -36,7 +37,8 @@ export function useGetTransactionRaw({
   transactionHash,
   enabled,
 }: GetTransactionArgs) {
-  return useQuery(["get-transaction-raw", chain, transactionHash], {
+  return useQuery({
+    queryKey: ["get-transaction-raw", chain, transactionHash],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/transaction/getTransaction?chain=${chain}&transactionHash=${transactionHash}&format=raw`

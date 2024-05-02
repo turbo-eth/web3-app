@@ -1,5 +1,6 @@
 import { HTMLAttributes } from "react"
-import { Address, useNetwork } from "wagmi"
+import { type Address } from "viem"
+import { useAccount } from "wagmi"
 
 import { cn } from "@/lib/utils"
 
@@ -17,7 +18,7 @@ export const BlockExplorerLink = ({
   type = "address",
   ...props
 }: BlockExplorerLinkProps) => {
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
   const blockExplorer = chain?.blockExplorers?.default
 
   if (!address) return null

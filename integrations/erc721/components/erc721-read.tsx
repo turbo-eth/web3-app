@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { Address } from "wagmi"
+import type { Address } from "viem"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"

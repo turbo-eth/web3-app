@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { SubscribeOptionsType } from "@pushprotocol/restapi/src/lib/channels"
 import { ImSpinner2 } from "react-icons/im"
-import { useAccount, useNetwork, useSwitchNetwork } from "wagmi"
+import { useAccount, useSwitchChain } from "wagmi"
 
 import { useEthersSigner } from "@/lib/hooks/web3/use-ethers-signer"
 
@@ -28,14 +28,12 @@ export function SubscribeButton({
   const channelChainId = pushEnvToChainId(env)
 
   const { address } = useAccount()
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
   const signer = useEthersSigner()
-  const { switchNetworkAsync } = useSwitchNetwork({
-    chainId: channelChainId,
-  })
+  const { switchChainAsync } = useSwitchChain()
 
-  const { isLoading: subLoading, mutateAsync: subscribe } = useSubscribe()
-  const { isLoading: unsubLoading, mutateAsync: unsubscribe } = useUnsubscribe()
+  const { isPending: subLoading, mutateAsync: subscribe } = useSubscribe()
+  const { isPending: unsubLoading, mutateAsync: unsubscribe } = useUnsubscribe()
 
   const { data: userSubscriptions, isLoading: userSubsIsLoading } =
     useUserSubscriptions({
@@ -60,7 +58,9 @@ export function SubscribeButton({
     if (!signer || !address) return
 
     if (channelChainId !== chain?.id) {
-      await switchNetworkAsync?.()
+      await switchChainAsync?.({
+        chainId: channelChainId,
+      })
     }
 
     const args: SubscribeOptionsType = {

@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react"
-import type { Address } from "wagmi"
+import type { Address } from "viem"
 
 import { Button } from "@/components/ui/button"
 

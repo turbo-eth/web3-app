@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react"
+import { deployContract, waitForTransactionReceipt } from "viem/actions"
 import { usePublicClient, useWalletClient } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -28,7 +29,8 @@ export function Erc1155Deploy() {
 
     let hash: `0x${string}` | undefined
     try {
-      hash = await walletClient.deployContract({
+      // @ts-ignore
+      hash = await deployContract(walletClient, {
         abi: erc1155ABI,
         bytecode: erc1155ByteCode,
         args: [name, symbol],
@@ -40,7 +42,10 @@ export function Erc1155Deploy() {
     setIsSigning(false)
     setIsWaitingTransaction(true)
     try {
-      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (!publicClient || !hash) return
+      const receipt = await waitForTransactionReceipt(publicClient, {
+        hash,
+      })
       if (!receipt.contractAddress) return
 
       setIsWaitingTransaction(false)

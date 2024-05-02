@@ -40,7 +40,7 @@ export function useTokenPercentageChange({
   period = "1d",
   lookForward = false,
   timestamp = Date.now() / 1000,
-  cacheTime = DEFAULT_CACHE_TIME,
+  gcTime = DEFAULT_CACHE_TIME,
   enabled,
   ...options
 }: UseTokenPercentageChangeProps) {
@@ -72,8 +72,8 @@ export function useTokenPercentageChange({
     }
   }
 
-  return useQuery(
-    [
+  return useQuery({
+    queryKey: [
       "defi-llama",
       "percentage-change-price",
       coins,
@@ -81,12 +81,10 @@ export function useTokenPercentageChange({
       lookForward,
       timestamp,
     ],
-    {
-      queryFn: fetcher,
-      enabled: !!coins && enabled,
-      ...options,
-    }
-  )
+    queryFn: fetcher,
+    enabled: !!coins && enabled,
+    ...options,
+  })
 }
 
 interface UseNativeTokenPercentageChangeProps

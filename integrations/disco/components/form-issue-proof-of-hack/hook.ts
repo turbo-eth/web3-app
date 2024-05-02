@@ -5,7 +5,7 @@ import { z } from "zod"
 import { useDiscoIssueProofOfHack } from "../../hooks/use-disco-issue-proof-of-hack"
 
 export const useDiscoIssueForm = () => {
-  const { mutate, data, isLoading, isError, error, isSuccess } =
+  const { mutate, data, isPending, isError, error, isSuccess } =
     useDiscoIssueProofOfHack()
   const discoSchema = z.object({
     eventDate: z.string().transform((value) => {
@@ -69,7 +69,7 @@ export const useDiscoIssueForm = () => {
     error,
     data,
     isError,
-    isLoading,
+    isPending,
     isSuccess,
     discoSchema,
     form,

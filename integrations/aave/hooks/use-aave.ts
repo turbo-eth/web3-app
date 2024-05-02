@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useAccount, useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import {
-  useUiPoolDataProviderGetReservesData,
-  useUiPoolDataProviderGetUserReservesData,
+  useReadUiPoolDataProviderGetReservesData,
+  useReadUiPoolDataProviderGetUserReservesData,
 } from "../generated/aave-wagmi"
 import { getDefaultUseAaveState } from "../utils"
 import { MarketDataType, marketsData } from "../utils/market-config"
@@ -17,26 +17,23 @@ import {
 } from "../utils/types"
 
 export const useAave = () => {
-  const { address: user } = useAccount()
-  const { chain } = useNetwork()
+  const { address: user, chain } = useAccount()
   const [market, setMarket] = useState<MarketDataType | null>(null)
   const [data, setData] = useState<AaveState>(getDefaultUseAaveState())
 
-  const { data: reservesData } = useUiPoolDataProviderGetReservesData({
+  const { data: reservesData } = useReadUiPoolDataProviderGetReservesData({
     address: market?.addresses.UI_POOL_DATA_PROVIDER,
     args: market
       ? [market?.addresses.LENDING_POOL_ADDRESS_PROVIDER]
       : undefined,
-    watch: true,
   })
 
-  const userReservesData = useUiPoolDataProviderGetUserReservesData({
+  const userReservesData = useReadUiPoolDataProviderGetUserReservesData({
     address: market?.addresses.UI_POOL_DATA_PROVIDER,
     args:
       market && user
         ? [market?.addresses.LENDING_POOL_ADDRESS_PROVIDER, user]
         : undefined,
-    watch: true,
   }).data?.[0] as UserReserveData[]
 
   useEffect(() => {
@@ -54,6 +51,7 @@ export const useAave = () => {
 
       const usdData = userReservesData.map((userReserveData) => {
         const reserveData = reservesData?.[0].find(
+          // @ts-ignore
           (reserve) =>
             reserve.underlyingAsset === userReserveData.underlyingAsset
         ) as ReserveData

@@ -1,14 +1,14 @@
 import { useMemo } from "react"
 import { providers } from "ethers"
-import { type HttpTransport } from "viem"
-import { usePublicClient, type PublicClient } from "wagmi"
+import { type HttpTransport, type PublicClient } from "viem"
+import { usePublicClient } from "wagmi"
 
 export function publicClientToProvider(publicClient: PublicClient) {
   const { chain, transport } = publicClient
   const network = {
-    chainId: chain.id,
-    name: chain.name,
-    ensAddress: chain.contracts?.ensRegistry?.address,
+    chainId: chain!.id,
+    name: chain!.name,
+    ensAddress: chain!.contracts?.ensRegistry?.address,
   }
   if (transport.type === "fallback")
     return new providers.FallbackProvider(
@@ -23,5 +23,5 @@ export function publicClientToProvider(publicClient: PublicClient) {
 /** Hook to convert a viem Public Client to an ethers.js Provider. */
 export function useEthersProvider({ chainId }: { chainId?: number } = {}) {
   const publicClient = usePublicClient({ chainId })
-  return useMemo(() => publicClientToProvider(publicClient), [publicClient])
+  return useMemo(() => publicClientToProvider(publicClient!), [publicClient])
 }

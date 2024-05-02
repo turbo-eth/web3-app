@@ -4,13 +4,13 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { TiTick } from "react-icons/ti"
 import { formatUnits, parseUnits } from "viem"
-import { useAccount, useWaitForTransaction } from "wagmi"
+import { useAccount, useWaitForTransactionReceipt } from "wagmi"
 
 import {
-  useErc20Allowance,
-  useErc20Approve,
-  useErc20BalanceOf,
-  useErc20Decimals,
+  useReadErc20Allowance,
+  useReadErc20BalanceOf,
+  useReadErc20Decimals,
+  useWriteErc20Approve,
 } from "@/lib/generated/blockchain"
 import { useToast } from "@/lib/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog"
 import { ContractWriteButton } from "@/components/blockchain/contract-write-button"
 
-import { usePoolSupply } from "../generated/aave-wagmi"
+import { useWritePoolSupply } from "../generated/aave-wagmi"
 import { useAave } from "../hooks/use-aave"
 
 interface IAssetToSupplyItem {
@@ -47,16 +47,14 @@ export const AssetToSupplyItem = ({
   const [supplyAmount, setSupplyAmount] = useState("")
   const [open, setOpen] = useState(false)
 
-  const { data: tokenBalance } = useErc20BalanceOf({
+  const { data: tokenBalance } = useReadErc20BalanceOf({
     address,
     args: user ? [user] : undefined,
-    watch: true,
   })
-  const { data: decimals } = useErc20Decimals({ address })
-  const allowance = useErc20Allowance({
+  const { data: decimals } = useReadErc20Decimals({ address })
+  const allowance = useReadErc20Allowance({
     address,
     args: user ? [user, poolAddress] : undefined,
-    watch: true,
   }).data
 
   const { toast } = useToast()
@@ -71,34 +69,23 @@ export const AssetToSupplyItem = ({
 
   const {
     data: dataApprove,
-    isLoading: isLoadingApproveWrite,
-    write: approveWrite,
-  } = useErc20Approve({
-    address,
-    args: [poolAddress, parseUnits(`${Number(supplyAmount)}`, decimals ?? 18)],
-  })
+    isPending: isLoadingApproveWrite,
+    writeContract: approveWrite,
+  } = useWriteErc20Approve()
 
-  const { isLoading: isLoadingApproveTx } = useWaitForTransaction({
-    hash: dataApprove?.hash,
+  const { isLoading: isLoadingApproveTx } = useWaitForTransactionReceipt({
+    hash: dataApprove,
   })
 
   const {
     data: dataSupply,
-    isLoading: isLoadingSupplyWrite,
-    write: supplyWrite,
-  } = usePoolSupply({
-    address: poolAddress,
-    args: [
-      address,
-      parseUnits(`${Number(supplyAmount)}`, decimals ?? 18),
-      user as `0x${string}`,
-      0,
-    ],
-  })
+    isPending: isLoadingSupplyWrite,
+    writeContract: supplyWrite,
+  } = useWritePoolSupply()
 
   const { isLoading: isLoadingSupplyTx, isSuccess: isSuccessTx } =
-    useWaitForTransaction({
-      hash: dataSupply?.hash,
+    useWaitForTransactionReceipt({
+      hash: dataSupply,
     })
 
   const buttonAction = () => {
@@ -106,9 +93,23 @@ export const AssetToSupplyItem = ({
       Number(formatUnits(allowance ?? BigInt(1), decimals ?? 18)) <
       Number(supplyAmount)
     ) {
-      approveWrite()
+      approveWrite({
+        address,
+        args: [
+          poolAddress,
+          parseUnits(`${Number(supplyAmount)}`, decimals ?? 18),
+        ],
+      })
     } else {
-      supplyWrite()
+      supplyWrite({
+        address: poolAddress,
+        args: [
+          address,
+          parseUnits(`${Number(supplyAmount)}`, decimals ?? 18),
+          user as `0x${string}`,
+          0,
+        ],
+      })
     }
   }
 

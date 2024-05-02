@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError, parseEther } from "viem"
-import { Address, useWaitForTransaction } from "wagmi"
+import { parseEther, type Address, type BaseError } from "viem"
+import { useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -12,8 +12,8 @@ import { IsWalletConnected } from "@/components/shared/is-wallet-connected"
 import { IsWalletDisconnected } from "@/components/shared/is-wallet-disconnected"
 
 import {
-  useErc20Transfer,
-  usePrepareErc20Transfer,
+  useSimulateErc20Transfer,
+  useWriteErc20Transfer,
 } from "../generated/erc20-wagmi"
 import ERC20EventTransfer from "./erc20-event-transfer"
 
@@ -35,23 +35,30 @@ export function ERC20ContractTransferTokens({
     debouncedAmount && !isNaN(Number(debouncedAmount))
   )
 
-  const { config, error, isError } = usePrepareErc20Transfer({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc20Transfer({
     address,
     args:
       debouncedTo && isValidAmount
         ? [debouncedTo, parseEther(`${Number(debouncedAmount)}`)]
         : undefined,
-    enabled: Boolean(debouncedTo && isValidAmount),
   })
 
-  const { data, write, isLoading: isLoadingWrite } = useErc20Transfer(config)
+  const {
+    data,
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc20Transfer()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -65,13 +72,13 @@ export function ERC20ContractTransferTokens({
         isLoadingWrite={isLoadingWrite}
         loadingTxText="Transferring..."
         type="submit"
-        write={!!write}
+        write={!!writeContract}
       >
         Transfer
       </ContractWriteButton>
       <TransactionStatus
         error={error as BaseError}
-        hash={data?.hash}
+        hash={data}
         isError={isError}
         isLoadingTx={isLoadingTx}
         isSuccess={isSuccess}

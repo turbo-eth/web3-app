@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError } from "viem"
-import { Address, useAccount, useWaitForTransaction } from "wagmi"
+import { type Address, type BaseError } from "viem"
+import { useAccount, useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -10,8 +10,8 @@ import { ContractWriteButton } from "@/components/blockchain/contract-write-butt
 import { TransactionStatus } from "@/components/blockchain/transaction-status"
 
 import {
-  useErc1155SafeBatchTransferFrom,
-  usePrepareErc1155SafeBatchTransferFrom,
+  useSimulateErc1155SafeBatchTransferFrom,
+  useWriteErc1155SafeBatchTransferFrom,
 } from "../generated/erc1155-wagmi"
 
 interface Erc1155WriteTransferProps {
@@ -75,7 +75,11 @@ export function Erc1155WriteBatchTransfer({
     false
   )
 
-  const { config, error, isError } = usePrepareErc1155SafeBatchTransferFrom({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc1155SafeBatchTransferFrom({
     address,
     args:
       transferFromAddress &&
@@ -90,26 +94,20 @@ export function Erc1155WriteBatchTransfer({
             "0x",
           ]
         : undefined,
-    enabled: Boolean(
-      transferFromAddress &&
-        debouncedToAddress &&
-        isTokenIdArrValid &&
-        isAmountArrValid
-    ),
   })
 
   const {
     data,
-    write,
-    isLoading: isLoadingWrite,
-  } = useErc1155SafeBatchTransferFrom(config)
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc1155SafeBatchTransferFrom()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -147,13 +145,13 @@ export function Erc1155WriteBatchTransfer({
             isLoadingWrite={isLoadingWrite}
             loadingTxText="Transferring..."
             type="submit"
-            write={!!write}
+            write={!!writeContract}
           >
             Batch Transfer
           </ContractWriteButton>
           <TransactionStatus
             error={error as BaseError}
-            hash={data?.hash}
+            hash={data}
             isError={isError && Boolean(isTokenIdArrValid && isAmountArrValid)}
             isLoadingTx={isLoadingTx}
             isSuccess={isSuccess}

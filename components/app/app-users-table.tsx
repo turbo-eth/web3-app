@@ -1,5 +1,5 @@
 import { HTMLAttributes, useMemo } from "react"
-import { Address } from "wagmi"
+import { type Address } from "viem"
 
 import { Address as AddressComponent } from "@/components/blockchain/address"
 import type { Users } from "@/app/api/app/users/route"

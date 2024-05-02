@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
-import { useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import { FetchResolverResponse } from "../utils/types"
 
 export const useTaskResolver = ({ taskId }: { taskId: string }) => {
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
 
-  return useQuery(["gelato-task-resolver", taskId, chain?.id], {
+  return useQuery({
+    queryKey: ["gelato-task-resolver", taskId, chain?.id],
     queryFn: async () => {
       const response = await axios.get<FetchResolverResponse>(
         `https://ops-task.fra.gelato.digital/1514007e8336fa99e6fe/api/contracts/${

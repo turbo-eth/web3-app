@@ -41,7 +41,7 @@ interface UseHistoricalTokenPriceProps extends QueryOptions {
 export function useHistoricalTokenPrice({
   coins,
   searchWidth = DEFAULT_SEARCH_WIDTH,
-  cacheTime = DEFAULT_CACHE_TIME,
+  gcTime = DEFAULT_CACHE_TIME,
   enabled,
   timestamp,
   ...options
@@ -77,14 +77,12 @@ export function useHistoricalTokenPrice({
     }
   }
 
-  return useQuery(
-    ["defi-llama", "historical-price", coins, searchWidth, timestamp],
-    {
-      queryFn: fetcher,
-      enabled: !!coins && enabled,
-      ...options,
-    }
-  )
+  return useQuery({
+    queryKey: ["defi-llama", "historical-price", coins, searchWidth, timestamp],
+    queryFn: fetcher,
+    enabled: !!coins && enabled,
+    ...options,
+  })
 }
 
 interface UseHistoricalNativeTokenPriceProps

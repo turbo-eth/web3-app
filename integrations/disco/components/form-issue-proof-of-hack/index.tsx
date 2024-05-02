@@ -19,7 +19,7 @@ import { issueProofOfHackFormControls } from "./controls"
 import { useDiscoIssueForm } from "./hook"
 
 export function FormCredentialIssuanceProofOfHack() {
-  const { onSubmit, form, isLoading, isError, isSuccess, error, data } =
+  const { onSubmit, form, isPending, isError, isSuccess, error, data } =
     useDiscoIssueForm()
   const { handleSubmit, register } = form
   const { toast, dismiss } = useToast()
@@ -77,9 +77,9 @@ export function FormCredentialIssuanceProofOfHack() {
                 <Button
                   variant="emerald"
                   className="w-full"
-                  disabled={isLoading}
+                  disabled={isPending}
                 >
-                  {isLoading ? "Loading..." : "Issue Proof of Hack Credential"}
+                  {isPending ? "Loading..." : "Issue Proof of Hack Credential"}
                 </Button>
               </div>
             </form>

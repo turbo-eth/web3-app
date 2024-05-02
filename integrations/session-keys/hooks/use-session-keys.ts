@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
+import type { Address } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
-import type { Address } from "wagmi"
 
 import { SessionKeysDB } from "../database"
 

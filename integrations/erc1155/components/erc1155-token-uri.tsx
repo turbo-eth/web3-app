@@ -1,4 +1,4 @@
-import { useErc1155Uri } from "../generated/erc1155-wagmi"
+import { useReadErc1155Uri } from "../generated/erc1155-wagmi"
 import { ERC1155Props } from "../utils/types"
 
 interface ERC1155TokenUriProps extends ERC1155Props {
@@ -12,7 +12,7 @@ export function ERC1155TokenUri({
   tokenId,
   ...props
 }: ERC1155TokenUriProps) {
-  const { data: tokenUriData } = useErc1155Uri({
+  const { data: tokenUriData } = useReadErc1155Uri({
     address,
     chainId,
     args: [tokenId],

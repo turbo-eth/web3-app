@@ -2,56 +2,42 @@
 
 import "@rainbow-me/rainbowkit/styles.css"
 
-import { ReactNode } from "react"
+import { type ReactNode } from "react"
+import { env } from "@/env.mjs"
 import {
-  connectorsForWallets,
   darkTheme,
+  getDefaultConfig,
   lightTheme,
   RainbowKitProvider,
 } from "@rainbow-me/rainbowkit"
-import {
-  coinbaseWallet,
-  injectedWallet,
-  metaMaskWallet,
-  rainbowWallet,
-  walletConnectWallet,
-} from "@rainbow-me/rainbowkit/wallets"
-import { createConfig, WagmiConfig } from "wagmi"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { WagmiProvider } from "wagmi"
 
-import { chains, publicClient, webSocketPublicClient } from "@/config/networks"
+import { chains, transports } from "@/config/networks"
 import { siteConfig } from "@/config/site"
 import { useColorMode } from "@/lib/state/color-mode"
 
-const connectors = connectorsForWallets([
-  {
-    groupName: "Recommended",
-    wallets: [
-      injectedWallet({ chains }),
-      metaMaskWallet({ chains }),
-      rainbowWallet({ chains }),
-      coinbaseWallet({ chains, appName: siteConfig.name }),
-      walletConnectWallet({ chains }),
-    ],
-  },
-])
-
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient,
-  webSocketPublicClient,
+const wagmiConfig = getDefaultConfig({
+  appName: siteConfig.title,
+  projectId: env.NEXT_PUBLIC_WC_PROJECT_ID,
+  chains,
+  transports,
+  ssr: true,
 })
+
+const queryClient = new QueryClient()
 
 export function RainbowKit({ children }: { children: ReactNode }) {
   const [colorMode] = useColorMode()
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider
-        chains={chains}
-        theme={colorMode == "dark" ? darkTheme() : lightTheme()}
-      >
-        {children}
-      </RainbowKitProvider>
-    </WagmiConfig>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider
+          theme={colorMode == "dark" ? darkTheme() : lightTheme()}
+        >
+          {children}
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   )
 }

@@ -1,4 +1,4 @@
-import { useErc1155AccountsByToken } from "../generated/erc1155-wagmi"
+import { useReadErc1155AccountsByToken } from "../generated/erc1155-wagmi"
 import { ERC1155Props } from "../utils/types"
 
 interface ERC1155OwnerOfProps extends ERC1155Props {
@@ -12,11 +12,10 @@ export function Erc1155OwnerOf({
   tokenId,
   ...props
 }: ERC1155OwnerOfProps) {
-  const { data } = useErc1155AccountsByToken({
+  const { data } = useReadErc1155AccountsByToken({
     address,
     chainId,
     args: [tokenId],
-    watch: true,
   })
 
   return (

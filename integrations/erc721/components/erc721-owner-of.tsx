@@ -1,4 +1,4 @@
-import { useErc721OwnerOf } from "../generated/erc721-wagmi"
+import { useReadErc721OwnerOf } from "../generated/erc721-wagmi"
 import { ERC721Props } from "../utils/types"
 
 interface ERC721OwnerOfProps extends ERC721Props {
@@ -12,11 +12,10 @@ export function ERC721OwnerOf({
   tokenId,
   ...props
 }: ERC721OwnerOfProps) {
-  const { data } = useErc721OwnerOf({
+  const { data } = useReadErc721OwnerOf({
     address,
     chainId,
     args: [tokenId],
-    watch: true,
   })
 
   return (

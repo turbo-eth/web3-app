@@ -1,4 +1,4 @@
-import { useErc721TotalSupply } from "../generated/erc721-wagmi"
+import { useReadErc721TotalSupply } from "../generated/erc721-wagmi"
 import { ERC721Props } from "../utils/types"
 
 export function ERC721TotalSupply({
@@ -7,10 +7,9 @@ export function ERC721TotalSupply({
   className,
   ...props
 }: ERC721Props) {
-  const { data } = useErc721TotalSupply({
+  const { data } = useReadErc721TotalSupply({
     address,
     chainId,
-    watch: true,
   })
 
   return (

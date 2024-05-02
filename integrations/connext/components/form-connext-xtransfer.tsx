@@ -5,13 +5,12 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { MdOutlineSwapHoriz } from "react-icons/md"
 import { RxCross2 } from "react-icons/rx"
-import { formatUnits, parseUnits } from "viem"
+import { Address, formatUnits, parseUnits } from "viem"
 import {
   useAccount,
   useBalance,
-  useNetwork,
   useSendTransaction,
-  useSwitchNetwork,
+  useSwitchChain,
 } from "wagmi"
 
 import { FADE_DOWN_ANIMATION_VARIANTS } from "@/config/design"
@@ -53,9 +52,8 @@ export function FormConnextXTransfer({
   isMainnet,
   setIsMainnet,
 }: FormConnextXTransferProps) {
-  const { chain } = useNetwork()
-  const { address } = useAccount()
-  const { isLoading: isSwitchingChain, switchNetwork } = useSwitchNetwork()
+  const { address, chain } = useAccount()
+  const { isPending: isSwitchingChain, switchChain } = useSwitchChain()
 
   const [originChain, setOriginChain] = useState(optimismDomainId)
   const [destinationChain, setDestinationChain] = useState(arbitrumDomainId)
@@ -80,7 +78,6 @@ export function FormConnextXTransfer({
       (contract) => contract.chain_id === getChain(originChain)?.chain_id
     )?.contract_address as `0x${string}`,
     chainId: getChain(originChain)?.chain_id ?? 1,
-    watch: true,
   })
   const { data: destinationBalance } = useBalance({
     address,
@@ -88,7 +85,6 @@ export function FormConnextXTransfer({
       (contract) => contract.chain_id === getChain(destinationChain)?.chain_id
     )?.contract_address as `0x${string}`,
     chainId: getChain(destinationChain)?.chain_id ?? 1,
-    watch: true,
   })
 
   const transferSupported = useSupportedTransfer({
@@ -157,17 +153,17 @@ export function FormConnextXTransfer({
   const transfers = useLatestTransfers(isMainnet)
 
   const {
-    isLoading: txLoading,
+    isPending: txLoading,
     isSuccess: txSuccess,
     reset: txReset,
     sendTransaction,
-  } = useSendTransaction(xcallRequest)
+  } = useSendTransaction()
   const {
-    isLoading: approveTxLoading,
+    isPending: approveTxLoading,
     isSuccess: approveTxSuccess,
     reset: approveTxReset,
     sendTransaction: approveSendTransaction,
-  } = useSendTransaction(approveRequest)
+  } = useSendTransaction()
 
   const isInOriginChain = () => {
     return chain?.id === getChain(originChain)?.chain_id
@@ -192,10 +188,20 @@ export function FormConnextXTransfer({
   const sendTx = () => {
     if (approveRequest && !contractApproved) {
       setContractApproved(true)
-      return approveSendTransaction?.()
+      return approveSendTransaction?.({
+        to: approveRequest?.to as Address,
+        value: approveRequest?.value,
+        data: approveRequest?.data,
+        chainId: getChain(originChain)?.chain_id,
+      })
     }
     if (xcallRequest) {
-      sendTransaction?.()
+      sendTransaction?.({
+        to: xcallRequest?.to as Address,
+        value: xcallRequest?.value,
+        data: xcallRequest?.data,
+        chainId: getChain(originChain)?.chain_id,
+      })
     }
   }
 
@@ -259,7 +265,7 @@ export function FormConnextXTransfer({
     const originChainData = getChain(originChain)
 
     if (!isInOriginChain()) {
-      switchNetwork?.(originChainData?.chain_id)
+      switchChain?.({ chainId: originChainData?.chain_id! })
     }
   }
 

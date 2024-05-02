@@ -25,7 +25,8 @@ export const useNotifications = ({
   limit,
   raw,
 }: UseNotificationsProps) => {
-  return useQuery(["notifications", user, spam, env, page, limit, raw], {
+  return useQuery({
+    queryKey: ["notifications", user, spam, env, page, limit, raw],
     queryFn: () => fetchNotifications({ user, spam, env, page, limit, raw }),
     refetchOnWindowFocus: false,
   })

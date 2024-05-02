@@ -1,5 +1,5 @@
 import Dexie, { Table } from "dexie"
-import type { Address } from "wagmi"
+import type { Address } from "viem"
 
 export interface SessionKey {
   id: string

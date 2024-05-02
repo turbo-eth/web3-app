@@ -37,7 +37,8 @@ const fetchChannel = async ({ channel, env }: UseChannelProps) => {
 }
 
 export const useChannel = ({ channel, env }: UseChannelProps) => {
-  return useQuery(["channel", channel, env], {
+  return useQuery({
+    queryKey: ["channel", channel, env],
     queryFn: () => fetchChannel({ channel, env }),
     refetchOnWindowFocus: false,
   })
