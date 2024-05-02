@@ -42,6 +42,9 @@ function ERC20ContractMintTokens({ address }: ERC20WriteMintProps) {
       accountAddress && isValidAmount
         ? [accountAddress, parseEther(`${Number(debouncedAmount)}`)]
         : undefined,
+    query: {
+      enabled: Boolean(accountAddress && isValidAmount),
+    },
   })
 
   const {

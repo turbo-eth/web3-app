@@ -40,6 +40,11 @@ export function Erc721WriteMint({ address }: Erc721WriteMintProps) {
       debouncedToAddress && debouncedTokenId && debouncedTokenUri
         ? [debouncedToAddress, BigInt(debouncedTokenId || 0), debouncedTokenUri]
         : undefined,
+    query: {
+      enabled: Boolean(
+        debouncedToAddress && debouncedTokenId && debouncedTokenUri
+      ),
+    },
   })
 
   const {

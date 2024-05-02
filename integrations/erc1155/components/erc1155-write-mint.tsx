@@ -54,6 +54,14 @@ export function Erc1155WriteMint({ address }: Erc1155WriteMintProps) {
             debouncedUri,
           ]
         : undefined,
+    query: {
+      enabled: Boolean(
+        debouncedToAddress &&
+          debouncedTokenId &&
+          debouncedTokenAmount &&
+          debouncedUri
+      ),
+    },
   })
 
   const {

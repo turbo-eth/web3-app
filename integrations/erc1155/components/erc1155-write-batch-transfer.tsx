@@ -94,6 +94,14 @@ export function Erc1155WriteBatchTransfer({
             "0x",
           ]
         : undefined,
+    query: {
+      enabled: Boolean(
+        transferFromAddress &&
+          debouncedToAddress &&
+          isTokenIdArrValid &&
+          isAmountArrValid
+      ),
+    },
   })
 
   const {

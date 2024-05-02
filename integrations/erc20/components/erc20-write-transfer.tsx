@@ -45,6 +45,9 @@ export function ERC20ContractTransferTokens({
       debouncedTo && isValidAmount
         ? [debouncedTo, parseEther(`${Number(debouncedAmount)}`)]
         : undefined,
+    query: {
+      enabled: Boolean(debouncedTo && isValidAmount),
+    },
   })
 
   const {

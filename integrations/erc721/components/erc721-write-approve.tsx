@@ -34,6 +34,9 @@ export function Erc721WriteApprove({ address }: Erc721WriteApproveProps) {
       debouncedToAddress && debouncedTokenId
         ? [debouncedToAddress, BigInt(debouncedTokenId)]
         : undefined,
+    query: {
+      enabled: Boolean(debouncedToAddress && debouncedTokenId),
+    },
   })
 
   const {

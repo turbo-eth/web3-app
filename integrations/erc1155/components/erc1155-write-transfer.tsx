@@ -52,6 +52,11 @@ export function Erc1155WriteTransfer({ address }: Erc1155WriteTransferProps) {
             "0x",
           ]
         : undefined,
+    query: {
+      enabled: Boolean(
+        transferFromAddress && debouncedToAddress && debouncedTokenId
+      ),
+    },
   })
 
   const {
