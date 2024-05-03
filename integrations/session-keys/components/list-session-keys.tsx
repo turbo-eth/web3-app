@@ -1,7 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { BsCheck2 } from "react-icons/bs"
-import type { Address } from "wagmi"
+import type { Address } from "viem"
 
 import { truncateEthAddress } from "@/lib/utils"
 import { Button } from "@/components/ui/button"

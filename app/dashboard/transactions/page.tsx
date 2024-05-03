@@ -1,6 +1,6 @@
 "use client"
 
-import { useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import { useUser } from "@/lib/hooks/use-user"
 import { IsWalletConnected } from "@/components/shared/is-wallet-connected"
@@ -40,7 +40,7 @@ export default function PageDashboardTransactions() {
 
 const Table = () => {
   const { user } = useUser()
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
   const { isLoading, data } = useEtherscanAccountTransactions(
     {
       chainId: chain?.id || 1,

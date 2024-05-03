@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { request } from "graphql-request"
-import { useAccount, useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import {
   GetAllTaskDataDocument,
@@ -27,13 +27,13 @@ const fetchActiveTasks = ({ address, gqlEndpoint }: FetchActiveTasksProps) => {
 }
 
 export const useActiveTasks = () => {
-  const { chain } = useNetwork()
-  const { address } = useAccount()
+  const { address, chain } = useAccount()
   const { automateSdk } = useGelatoAutomateSdk()
 
   const chainId = chain?.id
 
-  return useQuery(["gelato-tasks", address, automateSdk], {
+  return useQuery({
+    queryKey: ["gelato-tasks", address, automateSdk],
     queryFn: async () => {
       if (!chainId || !GELATO_CONSTANTS.networks[chainId] || !address)
         throw new Error("Missing Parameters")

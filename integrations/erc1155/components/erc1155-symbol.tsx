@@ -1,4 +1,4 @@
-import { useErc1155Symbol } from "../generated/erc1155-wagmi"
+import { useReadErc1155Symbol } from "../generated/erc1155-wagmi"
 import { ERC1155Props } from "../utils/types"
 
 export function Erc1155Symbol({
@@ -7,7 +7,7 @@ export function Erc1155Symbol({
   className,
   ...props
 }: ERC1155Props) {
-  const { data } = useErc1155Symbol({
+  const { data } = useReadErc1155Symbol({
     address,
     chainId,
   })

@@ -5,7 +5,7 @@ import { ethers } from "ethers"
 import moment from "moment"
 import { FormProvider, useForm } from "react-hook-form"
 import { FaExternalLinkAlt, FaSpinner } from "react-icons/fa"
-import { useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import { useEthersSigner } from "@/lib/hooks/web3/use-ethers-signer"
 import { Button } from "@/components/ui/button"
@@ -66,14 +66,14 @@ export function CreateTask() {
     },
   })
 
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
 
   const router = useRouter()
 
   const signer = useEthersSigner()
 
   const {
-    isLoading: createTaskIsLoading,
+    isPending: createTaskIsLoading,
     isError: createTaskIsError,
     mutateAsync: createTask,
   } = useNewTask()
@@ -189,6 +189,7 @@ export function CreateTask() {
         </div>
         {shouldShowResolverInputs && <ResolverInput />}
         {shouldShowRestrictionInfo && (
+          // @ts-ignore
           <RestrictionInfo dedicatedMsgSender={dedicatedMsgSender?.address} />
         )}
         {shouldShowIntervalInput && <IntervalInput />}

@@ -1,8 +1,7 @@
 import { useState } from "react"
-import { formatEther, zeroAddress } from "viem"
-import type { Address } from "wagmi"
+import { formatEther, zeroAddress, type Address } from "viem"
 
-import { useErc20TransferEvent } from "../generated/erc20-wagmi"
+import { useWatchErc20TransferEvent } from "../generated/erc20-wagmi"
 import { useERC20TokenStorage } from "../hooks/use-erc20-token-storage"
 
 export default function ERC20EventMint() {
@@ -13,9 +12,9 @@ export default function ERC20EventMint() {
     amount: bigint
   }>()
 
-  useErc20TransferEvent({
+  useWatchErc20TransferEvent({
     address: token,
-    listener(logs) {
+    onLogs(logs) {
       const { args } = logs[0]
       const { _from, _to, _value } = args
       if (_from == zeroAddress && _to && _value) {

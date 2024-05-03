@@ -3,7 +3,7 @@ import Link from "next/link"
 import moment from "moment"
 import { FaEdit, FaExternalLinkAlt, FaTimesCircle } from "react-icons/fa"
 import { FiChevronLeft } from "react-icons/fi"
-import { useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import { useAbi, useTask } from "../../hooks"
 import { useTaskResolver } from "../../hooks/use-task-resolver"
@@ -30,7 +30,7 @@ export function TaskView({ taskId }: TasKViewProps) {
   const [showRename, setShowRename] = useState(false)
 
   const { data: taskWithName, isLoading, refetch } = useTask({ taskId })
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
 
   const { data: abi } = useAbi({
     contractAddress: taskWithName?.task.execAddress as string,

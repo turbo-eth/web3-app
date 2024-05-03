@@ -102,16 +102,6 @@ export const turboIntegrations = {
     imgDark: "/integrations/openai-dark.svg",
     category: "general",
   },
-  pooltogether_v4: {
-    name: "PoolTogether",
-    href: "/integration/pooltogether-v4",
-    url: "https://pooltogether.com/",
-    description:
-      "PoolTogether is a prize savings protocol, enable you to win by saving.",
-    imgLight: "/integrations/pooltogether.svg",
-    imgDark: "/integrations/pooltogether.svg",
-    category: "protocols",
-  },
   livepeer: {
     name: "Livepeer",
     href: "/integration/livepeer",

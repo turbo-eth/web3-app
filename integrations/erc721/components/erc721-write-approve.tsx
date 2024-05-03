@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError } from "viem"
-import { Address, useWaitForTransaction } from "wagmi"
+import { type Address, type BaseError } from "viem"
+import { useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -9,8 +9,8 @@ import { ContractWriteButton } from "@/components/blockchain/contract-write-butt
 import { TransactionStatus } from "@/components/blockchain/transaction-status"
 
 import {
-  useErc721Approve,
-  usePrepareErc721Approve,
+  useSimulateErc721Approve,
+  useWriteErc721Approve,
 } from "../generated/erc721-wagmi"
 
 interface Erc721WriteApproveProps {
@@ -24,23 +24,33 @@ export function Erc721WriteApprove({ address }: Erc721WriteApproveProps) {
   const debouncedToAddress = useDebounce(watchToAddress, 500)
   const debouncedTokenId = useDebounce(watchTokenId, 500)
 
-  const { config, error, isError } = usePrepareErc721Approve({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc721Approve({
     address,
     args:
       debouncedToAddress && debouncedTokenId
         ? [debouncedToAddress, BigInt(debouncedTokenId)]
         : undefined,
-    enabled: Boolean(debouncedToAddress && debouncedTokenId),
+    query: {
+      enabled: Boolean(debouncedToAddress && debouncedTokenId),
+    },
   })
 
-  const { data, write, isLoading: isLoadingWrite } = useErc721Approve(config)
+  const {
+    data,
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc721Approve()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -56,13 +66,13 @@ export function Erc721WriteApprove({ address }: Erc721WriteApproveProps) {
             isLoadingWrite={isLoadingWrite}
             loadingTxText="Approving..."
             type="submit"
-            write={!!write}
+            write={!!writeContract}
           >
             Approve
           </ContractWriteButton>
           <TransactionStatus
             error={error as BaseError}
-            hash={data?.hash}
+            hash={data}
             isError={isError && Boolean(debouncedToAddress && debouncedTokenId)}
             isLoadingTx={isLoadingTx}
             isSuccess={isSuccess}

@@ -2,8 +2,8 @@
 
 import { HTMLAttributes } from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { formatUnits } from "viem"
-import { Address, useAccount } from "wagmi"
+import { formatUnits, type Address } from "viem"
+import { useAccount } from "wagmi"
 
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -12,11 +12,11 @@ import { IsWalletConnected } from "@/components/shared/is-wallet-connected"
 import { IsWalletDisconnected } from "@/components/shared/is-wallet-disconnected"
 
 import {
-  useErc20BalanceOf,
-  useErc20Decimals,
-  useErc20Name,
-  useErc20Symbol,
-  useErc20TotalSupply,
+  useReadErc20BalanceOf,
+  useReadErc20Decimals,
+  useReadErc20Name,
+  useReadErc20Symbol,
+  useReadErc20TotalSupply,
 } from "../generated/erc20-wagmi"
 
 interface ERC20Props extends HTMLAttributes<HTMLElement> {
@@ -44,7 +44,7 @@ export function ERC20Name({
   className,
   ...props
 }: ERC20ChainIdProps) {
-  const { data } = useErc20Name({
+  const { data } = useReadErc20Name({
     address,
     chainId,
   })
@@ -61,7 +61,7 @@ export function ERC20Symbol({
   className,
   ...props
 }: ERC20ChainIdProps) {
-  const { data } = useErc20Symbol({
+  const { data } = useReadErc20Symbol({
     address,
     chainId,
   })
@@ -78,12 +78,12 @@ export function ERC20TotalSupply({
   className,
   ...props
 }: ERC20ChainIdProps) {
-  const { data: decimals } = useErc20Decimals({
+  const { data: decimals } = useReadErc20Decimals({
     address,
     chainId,
   })
 
-  const { data } = useErc20TotalSupply({
+  const { data } = useReadErc20TotalSupply({
     address,
     chainId,
   })
@@ -101,7 +101,7 @@ export function ERC20Decimals({
   className,
   ...props
 }: ERC20ChainIdProps) {
-  const { data } = useErc20Decimals({
+  const { data } = useReadErc20Decimals({
     address,
     chainId,
   })
@@ -119,15 +119,14 @@ export function ERC20Balance({
   ...props
 }: ERC20ChainIdProps) {
   const { address: accountAddress } = useAccount()
-  const { data: decimals } = useErc20Decimals({
+  const { data: decimals } = useReadErc20Decimals({
     address,
     chainId,
   })
-  const { data } = useErc20BalanceOf({
+  const { data } = useReadErc20BalanceOf({
     chainId,
     address,
     args: accountAddress ? [accountAddress] : undefined,
-    watch: true,
   })
 
   if (!data || !decimals) return null

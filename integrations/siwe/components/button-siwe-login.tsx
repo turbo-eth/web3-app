@@ -1,7 +1,7 @@
 "use client"
 
 import { HTMLAttributes } from "react"
-import { useAccount, useNetwork, useSignMessage } from "wagmi"
+import { useAccount, useSignMessage } from "wagmi"
 
 import { useUser } from "@/lib/hooks/use-user"
 import { cn } from "@/lib/utils"
@@ -20,9 +20,8 @@ export const ButtonSIWELogin = ({
   ...props
 }: ButtonSIWELoginProps) => {
   const { mutateUser } = useUser()
-  const { isLoading, signMessageAsync } = useSignMessage()
-  const { address } = useAccount()
-  const { chain } = useNetwork()
+  const { isPending, signMessageAsync } = useSignMessage()
+  const { address, chain } = useAccount()
 
   const handleCreateMessage = async () => {
     try {
@@ -35,7 +34,7 @@ export const ButtonSIWELogin = ({
   }
   const classes = cn("relative", className)
   const labelClasses = cn({
-    "opacity-0": isLoading,
+    "opacity-0": isPending,
   })
 
   return (
@@ -48,7 +47,7 @@ export const ButtonSIWELogin = ({
       onClick={() => void handleCreateMessage()}
       {...props}
     >
-      {isLoading && (
+      {isPending && (
         <span className="absolute left-1/2 top-1/2 inline-block h-5 w-5 -translate-x-1/2 -translate-y-1/2" />
       )}
       <span className={labelClasses}>{children || label || "Logout"}</span>

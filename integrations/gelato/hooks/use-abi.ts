@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { isAddress } from "viem"
-import { useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import { GELATO_CONSTANTS } from "../utils/constants"
 import { ExplorerFetchAbiResponse } from "../utils/types"
@@ -28,9 +28,10 @@ const abiFetcher = async ({
 }
 
 export const useAbi = ({ contractAddress }: { contractAddress: string }) => {
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
 
-  return useQuery(["gelato-contract-abi", chain?.id, contractAddress], {
+  return useQuery({
+    queryKey: ["gelato-contract-abi", chain?.id, contractAddress],
     queryFn: () => {
       if (!chain?.id || !contractAddress || !isAddress(contractAddress)) {
         throw new Error("Invalid Parameters")

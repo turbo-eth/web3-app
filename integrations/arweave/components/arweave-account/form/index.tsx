@@ -33,7 +33,7 @@ const ArweaveAccountForm = () => {
   const {
     onSubmit,
     form,
-    isLoading,
+    isPending,
     isError,
     isSuccess,
     error,
@@ -83,17 +83,16 @@ const ArweaveAccountForm = () => {
                 <Button
                   variant="emerald"
                   className="w-full"
-                  disabled={isLoading}
+                  disabled={isPending}
                 >
-                  {isLoading
+                  {isPending
                     ? "Loading..."
                     : userHasAccount
                     ? "Update Arweave account"
                     : "Create Arweave account"}
                 </Button>
                 {isError ? (
-                  (error as { insufficientBalance: boolean })
-                    .insufficientBalance ? (
+                  (error as any).insufficientBalance ? (
                     <InsufficientBalanceError />
                   ) : (
                     <div className="mt-3 font-medium text-red-500">

@@ -1,8 +1,8 @@
 import { isAutomateSupported } from "@gelatonetwork/automate-sdk"
-import { useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 export const useIsAutomateSupported = () => {
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
 
   return chain?.id ? isAutomateSupported(chain.id) : false
 }

@@ -1,8 +1,8 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError, parseEther } from "viem"
-import { Address, useAccount, useWaitForTransaction } from "wagmi"
+import { parseEther, type Address, type BaseError } from "viem"
+import { useAccount, useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -12,8 +12,8 @@ import { IsWalletConnected } from "@/components/shared/is-wallet-connected"
 import { IsWalletDisconnected } from "@/components/shared/is-wallet-disconnected"
 
 import {
-  useErc20MintableMint,
-  usePrepareErc20MintableMint,
+  useSimulateErc20MintableMint,
+  useWriteErc20MintableMint,
 } from "../generated/erc20-wagmi"
 import ERC20EventMint from "./erc20-event-mint"
 
@@ -32,27 +32,33 @@ function ERC20ContractMintTokens({ address }: ERC20WriteMintProps) {
     debouncedAmount && !isNaN(Number(debouncedAmount))
   )
 
-  const { config, error, isError } = usePrepareErc20MintableMint({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc20MintableMint({
     address,
     args:
       accountAddress && isValidAmount
         ? [accountAddress, parseEther(`${Number(debouncedAmount)}`)]
         : undefined,
-    enabled: Boolean(address && isValidAmount),
+    query: {
+      enabled: Boolean(accountAddress && isValidAmount),
+    },
   })
 
   const {
     data,
-    write,
-    isLoading: isLoadingWrite,
-  } = useErc20MintableMint(config)
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc20MintableMint()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -64,13 +70,13 @@ function ERC20ContractMintTokens({ address }: ERC20WriteMintProps) {
         isLoadingWrite={isLoadingWrite}
         loadingTxText="Minting..."
         type="submit"
-        write={!!write}
+        write={!!writeContract}
       >
         Mint
       </ContractWriteButton>
       <TransactionStatus
         error={error as BaseError}
-        hash={data?.hash}
+        hash={data}
         isError={isError}
         isLoadingTx={isLoadingTx}
         isSuccess={isSuccess}

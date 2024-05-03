@@ -1,6 +1,6 @@
 import * as LitJsSdk from "@lit-protocol/lit-node-client"
 import { LitProtocolMessage } from "@prisma/client"
-import { useAccount, useNetwork, useSignMessage } from "wagmi"
+import { useAccount, useSignMessage } from "wagmi"
 
 import { siweMessage } from "@/integrations/siwe/actions/siwe-message"
 
@@ -10,8 +10,7 @@ import { AccessControlConditions } from "../utils/types"
 
 export const useLitClient = () => {
   const { signMessageAsync } = useSignMessage()
-  const { address } = useAccount()
-  const { chain } = useNetwork()
+  const { address, chain } = useAccount()
 
   /**
    * Get auth signature using siwe

@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError } from "viem"
-import { Address, useWaitForTransaction } from "wagmi"
+import { type Address, type BaseError } from "viem"
+import { useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -9,8 +9,8 @@ import { ContractWriteButton } from "@/components/blockchain/contract-write-butt
 import { TransactionStatus } from "@/components/blockchain/transaction-status"
 
 import {
-  useErc1155SetApprovalForAll,
-  usePrepareErc1155SetApprovalForAll,
+  useSimulateErc1155SetApprovalForAll,
+  useWriteErc1155SetApprovalForAll,
 } from "../generated/erc1155-wagmi"
 
 interface Erc1155WriteSetApprovalForAllProps {
@@ -26,27 +26,33 @@ export function Erc1155WriteApproveForAll({
   const debouncedToAddress = useDebounce(watchToAddress, 500)
   const debouncedShouldApproved = useDebounce(watchShouldApproved, 500)
 
-  const { config, error, isError } = usePrepareErc1155SetApprovalForAll({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc1155SetApprovalForAll({
     address,
     args:
       debouncedToAddress && debouncedShouldApproved
         ? [debouncedToAddress, debouncedShouldApproved]
         : undefined,
-    enabled: Boolean(debouncedToAddress && debouncedShouldApproved),
+    query: {
+      enabled: Boolean(debouncedToAddress && debouncedShouldApproved),
+    },
   })
 
   const {
     data,
-    write,
-    isLoading: isLoadingWrite,
-  } = useErc1155SetApprovalForAll(config)
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc1155SetApprovalForAll()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -66,13 +72,13 @@ export function Erc1155WriteApproveForAll({
             isLoadingWrite={isLoadingWrite}
             loadingTxText="Approving..."
             type="submit"
-            write={!!write}
+            write={!!writeContract}
           >
             Approve For All
           </ContractWriteButton>
           <TransactionStatus
             error={error as BaseError}
-            hash={data?.hash}
+            hash={data}
             isError={
               isError && Boolean(debouncedToAddress && debouncedShouldApproved)
             }

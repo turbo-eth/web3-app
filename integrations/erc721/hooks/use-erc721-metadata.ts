@@ -1,6 +1,6 @@
-import { useQuery } from "wagmi"
+import { useQuery } from "@tanstack/react-query"
 
-import { useErc721TokenUri } from "../generated/erc721-wagmi"
+import { useReadErc721TokenUri } from "../generated/erc721-wagmi"
 import { ERC721Props } from "../utils/types"
 
 interface useERC721MetadataProps
@@ -36,32 +36,30 @@ export function useERC721Metadata({
   tokenId,
   ipfsGatewayUrl = "https://cloudflare-ipfs.com/ipfs",
 }: useERC721MetadataProps) {
-  const { data: tokenUriData } = useErc721TokenUri({
+  const { data: tokenUriData } = useReadErc721TokenUri({
     address,
     chainId,
     args: [tokenId],
   })
 
-  const metadataQuery = useQuery(
-    [address, chainId, "tokenUri", tokenId, tokenUriData],
-    {
-      queryFn: async () => {
-        if (!tokenUriData) throw new Error("No tokenUri found")
-        const uri = tokenUriData.replace("ipfs://", "")
-        const response = await fetch(`${ipfsGatewayUrl}/${uri}`)
-        const json = (await response.json()) as IERC721Metadata
+  const metadataQuery = useQuery({
+    queryKey: [address, chainId, "tokenUri", tokenId.toString(), tokenUriData],
+    queryFn: async () => {
+      if (!tokenUriData) throw new Error("No tokenUri found")
+      const uri = tokenUriData.replace("ipfs://", "")
+      const response = await fetch(`${ipfsGatewayUrl}/${uri}`)
+      const json = (await response.json()) as IERC721Metadata
 
-        if (!json.image) throw new Error("No image found in metadata")
-        if (!json.attributes) throw new Error("No attributes found in metadata")
+      if (!json.image) throw new Error("No image found in metadata")
+      if (!json.attributes) throw new Error("No attributes found in metadata")
 
-        json.image = json.image.startsWith("ipfs://")
-          ? json.image.replace("ipfs://", `${ipfsGatewayUrl}/`)
-          : json.image
-        return json
-      },
-      enabled: !!tokenUriData,
-    }
-  )
+      json.image = json.image.startsWith("ipfs://")
+        ? json.image.replace("ipfs://", `${ipfsGatewayUrl}/`)
+        : json.image
+      return json
+    },
+    enabled: !!tokenUriData,
+  })
 
   return metadataQuery
 }

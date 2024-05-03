@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError } from "viem"
-import { Address, useAccount, useWaitForTransaction } from "wagmi"
+import { type Address, type BaseError } from "viem"
+import { useAccount, useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -9,8 +9,8 @@ import { ContractWriteButton } from "@/components/blockchain/contract-write-butt
 import { TransactionStatus } from "@/components/blockchain/transaction-status"
 
 import {
-  useErc721SafeTransferFrom,
-  usePrepareErc721SafeTransferFrom,
+  useSimulateErc721SafeTransferFrom,
+  useWriteErc721SafeTransferFrom,
 } from "../generated/erc721-wagmi"
 
 interface Erc721WriteTransferProps {
@@ -34,29 +34,30 @@ export function Erc721WriteTransfer({ address }: Erc721WriteTransferProps) {
     ? debouncedFromAddress
     : accountAddress
 
-  const { config, error, isError } = usePrepareErc721SafeTransferFrom({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc721SafeTransferFrom({
     address,
     args:
       transferFromAddress && debouncedToAddress && debouncedTokenId
         ? [transferFromAddress, debouncedToAddress, BigInt(debouncedTokenId)]
         : undefined,
-    enabled: Boolean(
-      transferFromAddress && debouncedToAddress && debouncedTokenId
-    ),
   })
 
   const {
     data,
-    write,
-    isLoading: isLoadingWrite,
-  } = useErc721SafeTransferFrom(config)
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc721SafeTransferFrom()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -88,13 +89,13 @@ export function Erc721WriteTransfer({ address }: Erc721WriteTransferProps) {
             isLoadingWrite={isLoadingWrite}
             loadingTxText="Transferring..."
             type="submit"
-            write={!!write}
+            write={!!writeContract}
           >
             Transfer
           </ContractWriteButton>
           <TransactionStatus
             error={error as BaseError}
-            hash={data?.hash}
+            hash={data}
             isError={isError}
             isLoadingTx={isLoadingTx}
             isSuccess={isSuccess}

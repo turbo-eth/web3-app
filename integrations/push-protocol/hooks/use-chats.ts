@@ -15,12 +15,10 @@ export const useChats = ({
   pgpPrivateKey,
   toDecrypt,
 }: UseChatsProps) => {
-  return useQuery(
-    ["chats", account, env, page, limit, pgpPrivateKey, toDecrypt],
-    {
-      queryFn: () =>
-        fetchChats({ account, env, page, limit, pgpPrivateKey, toDecrypt }),
-      refetchOnWindowFocus: false,
-    }
-  )
+  return useQuery({
+    queryKey: ["chats", account, env, page, limit, pgpPrivateKey, toDecrypt],
+    queryFn: () =>
+      fetchChats({ account, env, page, limit, pgpPrivateKey, toDecrypt }),
+    refetchOnWindowFocus: false,
+  })
 }

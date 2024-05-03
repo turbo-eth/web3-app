@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useDebounce } from "usehooks-ts"
-import { BaseError } from "viem"
-import { Address, useWaitForTransaction } from "wagmi"
+import { type Address, type BaseError } from "viem"
+import { useWaitForTransactionReceipt } from "wagmi"
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -9,8 +9,8 @@ import { ContractWriteButton } from "@/components/blockchain/contract-write-butt
 import { TransactionStatus } from "@/components/blockchain/transaction-status"
 
 import {
-  useErc1155Approve,
-  usePrepareErc1155Approve,
+  useSimulateErc1155Approve,
+  useWriteErc1155Approve,
 } from "../generated/erc1155-wagmi"
 
 interface Erc1155WriteApproveProps {
@@ -24,7 +24,11 @@ export function Erc1155WriteApprove({ address }: Erc1155WriteApproveProps) {
   const debouncedTokenId = useDebounce(watch("tokenId"), 500)
   const debouncedTargetValue = useDebounce(watch("targetValue"), 500)
 
-  const { config, error, isError } = usePrepareErc1155Approve({
+  const {
+    data: config,
+    error,
+    isError,
+  } = useSimulateErc1155Approve({
     address,
     args:
       debouncedToAddress && debouncedTokenId
@@ -34,19 +38,25 @@ export function Erc1155WriteApprove({ address }: Erc1155WriteApproveProps) {
             BigInt(debouncedTargetValue),
           ]
         : undefined,
-    enabled: Boolean(
-      debouncedToAddress && debouncedTokenId && debouncedTargetValue
-    ),
+    query: {
+      enabled: Boolean(
+        debouncedToAddress && debouncedTokenId && debouncedTargetValue
+      ),
+    },
   })
 
-  const { data, write, isLoading: isLoadingWrite } = useErc1155Approve(config)
+  const {
+    data,
+    writeContract,
+    isPending: isLoadingWrite,
+  } = useWriteErc1155Approve()
 
-  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingTx, isSuccess } = useWaitForTransactionReceipt({
+    hash: data,
   })
 
   const onSubmit = () => {
-    write?.()
+    writeContract?.(config!.request)
   }
 
   return (
@@ -65,13 +75,13 @@ export function Erc1155WriteApprove({ address }: Erc1155WriteApproveProps) {
             isLoadingWrite={isLoadingWrite}
             loadingTxText="Approving..."
             type="submit"
-            write={!!write}
+            write={!!writeContract}
           >
             Approve
           </ContractWriteButton>
           <TransactionStatus
             error={error as BaseError}
-            hash={data?.hash}
+            hash={data}
             isError={
               isError &&
               Boolean(

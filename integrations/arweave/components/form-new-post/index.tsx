@@ -30,7 +30,7 @@ export const FormNewPost = () => {
   const {
     onSubmit,
     form,
-    isLoading,
+    isPending,
     isError,
     isSuccess,
     error,
@@ -155,13 +155,12 @@ export const FormNewPost = () => {
                 <Button
                   variant="emerald"
                   className="w-full"
-                  disabled={isLoading || estimation.isEstimatingTxFee}
+                  disabled={isPending || estimation.isEstimatingTxFee}
                 >
-                  {isLoading ? "Loading..." : "Create Arweave post"}
+                  {isPending ? "Loading..." : "Create Arweave post"}
                 </Button>
                 {isError ? (
-                  (error as { insufficientBalance: boolean })
-                    .insufficientBalance ? (
+                  (error as any).insufficientBalance ? (
                     <InsufficientBalanceError />
                   ) : (
                     <div className="mt-3 font-medium text-red-500">

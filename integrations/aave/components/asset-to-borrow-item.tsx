@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { parseUnits } from "viem"
-import { useAccount, useWaitForTransaction } from "wagmi"
+import { useAccount, useWaitForTransactionReceipt } from "wagmi"
 
-import { useErc20Decimals } from "@/lib/generated/blockchain"
+import { useReadErc20Decimals } from "@/lib/generated/blockchain"
 import { useToast } from "@/lib/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select"
 import { ContractWriteButton } from "@/components/blockchain/contract-write-button"
 
-import { usePoolBorrow } from "../generated/aave-wagmi"
+import { useWritePoolBorrow } from "../generated/aave-wagmi"
 import { useAave } from "../hooks/use-aave"
 
 interface IAssetToSupplyItem {
@@ -50,7 +50,7 @@ export const AssetToBorrowItem = ({
   const { address: user } = useAccount()
   const [borrowAmount, setBorrowAmount] = useState("")
   const [borrowVariableRateMode, setBorrowVariableRateMode] = useState(true)
-  const { data: decimals } = useErc20Decimals({ address })
+  const { data: decimals } = useReadErc20Decimals({ address })
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
 
@@ -64,22 +64,13 @@ export const AssetToBorrowItem = ({
 
   const {
     data,
-    isLoading: isLoadingWrite,
-    write: borrowWrite,
-  } = usePoolBorrow({
-    address: poolAddress,
-    args: [
-      address,
-      parseUnits(`${Number(borrowAmount)}`, decimals ?? 18),
-      borrowVariableRateMode ? BigInt(2) : BigInt(1),
-      0,
-      user as `0x${string}`,
-    ],
-  })
+    isPending: isLoadingWrite,
+    writeContract: borrowWrite,
+  } = useWritePoolBorrow()
 
   const { isLoading: isLoadingTx, isSuccess: isSuccessTx } =
-    useWaitForTransaction({
-      hash: data?.hash,
+    useWaitForTransactionReceipt({
+      hash: data,
     })
 
   const buttonAction = () => {
@@ -88,7 +79,16 @@ export const AssetToBorrowItem = ({
         "You have to borrow more than the amount supplied on stable rate mode!"
       )
     }
-    borrowWrite()
+    borrowWrite({
+      address: poolAddress,
+      args: [
+        address,
+        parseUnits(`${Number(borrowAmount)}`, decimals ?? 18),
+        borrowVariableRateMode ? BigInt(2) : BigInt(1),
+        0,
+        user as `0x${string}`,
+      ],
+    })
   }
 
   const setMaxAmount = () =>

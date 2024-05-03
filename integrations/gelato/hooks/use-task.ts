@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import request from "graphql-request"
-import { useNetwork } from "wagmi"
+import { useAccount } from "wagmi"
 
 import {
   GetTaskDocument,
@@ -25,9 +25,10 @@ const fetchTask = ({ id, gqlEndpoint }: FetchTaskProps) => {
 
 export const useTask = ({ taskId }: { taskId: string }) => {
   const { automateSdk } = useGelatoAutomateSdk()
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
 
-  return useQuery(["gelato-task", taskId, automateSdk], {
+  return useQuery({
+    queryKey: ["gelato-task", taskId, automateSdk],
     queryFn: async () => {
       const taskNames = await automateSdk?.getTaskNames([taskId])
       const task = await fetchTask({

@@ -15,7 +15,8 @@ export function useGetInternalTransactions({
   transactionHash,
   enabled,
 }: GetInternalTransactionsArgs) {
-  return useQuery(["get-internal-transactions", chain, transactionHash], {
+  return useQuery({
+    queryKey: ["get-internal-transactions", chain, transactionHash],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/transaction/getInternalTransactions?chain=${chain}&transactionHash=${transactionHash}&format=result`
@@ -36,7 +37,8 @@ export function useGetInternalTransactionsRaw({
   transactionHash,
   enabled,
 }: GetInternalTransactionsArgs) {
-  return useQuery(["get-internal-transactions-raw", chain, transactionHash], {
+  return useQuery({
+    queryKey: ["get-internal-transactions-raw", chain, transactionHash],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/transaction/getInternalTransactions?chain=${chain}&transactionHash=${transactionHash}&format=raw`

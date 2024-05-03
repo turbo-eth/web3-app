@@ -1,5 +1,5 @@
 import { HTMLAttributes } from "react"
-import type { Address } from "wagmi"
+import type { Address } from "viem"
 
 import { useUser } from "@/lib/hooks/use-user"
 import { cn } from "@/lib/utils"

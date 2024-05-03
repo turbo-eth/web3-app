@@ -2,7 +2,7 @@ import { HTMLAttributes } from "react"
 import Image from "next/image"
 import { LuExternalLink } from "react-icons/lu"
 import ReactMarkdown from "react-markdown"
-import type { Address } from "wagmi"
+import type { Address } from "viem"
 
 import { useUser } from "@/lib/hooks/use-user"
 import { cn } from "@/lib/utils"
@@ -49,8 +49,8 @@ export const DiscoProfileBasic = ({
             alt="Profile Avatar"
             className="mx-auto max-w-full rounded-lg border-4 shadow-xl lg:ml-0"
             height={240}
-            loader={() => data?.profile?.avatar}
-            src={data?.profile?.avatar}
+            loader={() => data?.profile?.avatar || ""}
+            src={data?.profile?.avatar || ""}
             width={240}
           />
         )}

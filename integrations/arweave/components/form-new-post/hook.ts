@@ -51,7 +51,7 @@ const useCreateArweavePostAPI = () => {
 
 export const useArweavePostForm = () => {
   const { wallet } = useArweaveWallet()
-  const { mutate, data, isLoading, isError, error, isSuccess } =
+  const { mutate, data, isPending, isError, error, isSuccess } =
     useCreateArweavePostAPI()
   const txSchema = z.object({
     data: z.string(),
@@ -128,7 +128,7 @@ export const useArweavePostForm = () => {
     error,
     data,
     isError,
-    isLoading,
+    isPending,
     isSuccess,
     txSchema,
     form,

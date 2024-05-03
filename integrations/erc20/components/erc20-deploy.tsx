@@ -31,6 +31,7 @@ export function DeployERC20Contract() {
     let hash: `0x${string}` | undefined
 
     try {
+      // @ts-ignore
       hash = await walletClient.deployContract({
         abi: erc20MintableABI,
         bytecode: erc20MintableByteCode,
@@ -44,6 +45,7 @@ export function DeployERC20Contract() {
     setIsSigning(false)
     setIsWaitingTransaction(true)
     try {
+      // @ts-ignore
       const receipt = await publicClient.waitForTransactionReceipt({ hash })
       if (!receipt.contractAddress) return
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { Address } from "wagmi"
+import { type Address } from "viem"
 
 import { ERC20Read } from "@/integrations/erc20/components/erc20-read"
 

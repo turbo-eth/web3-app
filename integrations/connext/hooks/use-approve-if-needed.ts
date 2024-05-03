@@ -42,13 +42,17 @@ export const useApproveIfNeeded = ({
     return data.txRequest
   }
 
-  const { data: request, isLoading } = useQuery(
-    ["approveIfNeeded", isMainnet, originDomain, assetAddress, amount],
-    {
-      queryFn: fetchData,
-      enabled: !!originDomain && !!assetAddress && !!amount, // only fetch if all params are truthy
-    }
-  )
+  const { data: request, isLoading } = useQuery({
+    queryKey: [
+      "approveIfNeeded",
+      isMainnet,
+      originDomain,
+      assetAddress,
+      amount,
+    ],
+    queryFn: fetchData,
+    enabled: !!originDomain && !!assetAddress && !!amount, // only fetch if all params are truthy
+  })
 
   return { request, isLoading }
 }

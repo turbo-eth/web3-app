@@ -36,7 +36,7 @@ const useEditProfileAPI = () => {
 
 export const useArweaveAccountForm = () => {
   const { account, wallet } = useArweaveWallet()
-  const { mutate, data, isLoading, isError, error, isSuccess } =
+  const { mutate, data, isPending, isError, error, isSuccess } =
     useEditProfileAPI()
   const profileSchema = z.object({
     handleName: z.string().min(1),
@@ -98,7 +98,7 @@ export const useArweaveAccountForm = () => {
     error,
     data,
     isError,
-    isLoading,
+    isPending,
     isSuccess,
     profileSchema,
     form,

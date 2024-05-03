@@ -4,14 +4,14 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { TiArrowRight } from "react-icons/ti"
 import { formatUnits, parseUnits } from "viem"
-import { useAccount, useWaitForTransaction } from "wagmi"
+import { useAccount, useWaitForTransactionReceipt } from "wagmi"
 
 import {
-  useErc20Allowance,
-  useErc20Approve,
-  useErc20BalanceOf,
-  useErc20Decimals,
-  useErc20Symbol,
+  useReadErc20Allowance,
+  useReadErc20BalanceOf,
+  useReadErc20Decimals,
+  useReadErc20Symbol,
+  useWriteErc20Approve,
 } from "@/lib/generated/blockchain"
 import { useToast } from "@/lib/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -32,9 +32,9 @@ import {
 import { ContractWriteButton } from "@/components/blockchain/contract-write-button"
 
 import {
-  usePoolRepay,
-  usePoolRepayWithATokens,
-  usePoolSwapBorrowRateMode,
+  useWritePoolRepay,
+  useWritePoolRepayWithATokens,
+  useWritePoolSwapBorrowRateMode,
 } from "../generated/aave-wagmi"
 import { useAave } from "../hooks/use-aave"
 import { limitDecimals } from "../utils"
@@ -65,17 +65,15 @@ export const BorrowedAssetsItem = ({
   const [repayWithATokens, setRepayWithATokens] = useState(false)
   const [open, setOpen] = useState(false)
 
-  const symbol = getSymbol(useErc20Symbol({ address }).data)
-  const { data: tokenBalance } = useErc20BalanceOf({
+  const symbol = getSymbol(useReadErc20Symbol({ address }).data)
+  const { data: tokenBalance } = useReadErc20BalanceOf({
     address,
     args: user ? [user] : undefined,
-    watch: true,
   })
-  const { data: decimals } = useErc20Decimals({ address })
-  const allowance = useErc20Allowance({
+  const { data: decimals } = useReadErc20Decimals({ address })
+  const allowance = useReadErc20Allowance({
     address,
     args: user ? [user, poolAddress] : undefined,
-    watch: true,
   }).data
 
   const { toast } = useToast()
@@ -90,60 +88,40 @@ export const BorrowedAssetsItem = ({
 
   const {
     data: dataApprove,
-    isLoading: isLoadingApproveWrite,
-    write: approveWrite,
-  } = useErc20Approve({
-    address,
-    args: [poolAddress, parseUnits(`${Number(repayAmount)}`, decimals ?? 18)],
-  })
+    isPending: isLoadingApproveWrite,
+    writeContract: approveWrite,
+  } = useWriteErc20Approve()
 
-  const { isLoading: isLoadingApproveTx } = useWaitForTransaction({
-    hash: dataApprove?.hash,
+  const { isLoading: isLoadingApproveTx } = useWaitForTransactionReceipt({
+    hash: dataApprove,
   })
 
   const {
     data: dataRepay,
-    isLoading: isLoadingRepayWrite,
-    write: repayWrite,
-  } = usePoolRepay({
-    address: poolAddress,
-    args: [
-      address,
-      parseUnits(`${Number(repayAmount)}`, decimals ?? 18),
-      rateMode,
-      user as `0x${string}`,
-    ],
-  })
+    isPending: isLoadingRepayWrite,
+    writeContract: repayWrite,
+  } = useWritePoolRepay()
 
   const { isLoading: isLoadingRepayTx, isSuccess: isSuccessRepayTx } =
-    useWaitForTransaction({
-      hash: dataRepay?.hash,
+    useWaitForTransactionReceipt({
+      hash: dataRepay,
     })
 
   const {
     data: dataRepayATokens,
-    isLoading: isLoadingRepayATokensWrite,
-    write: repayWithATokensWrite,
-  } = usePoolRepayWithATokens({
-    address: poolAddress,
-    args: [
-      address,
-      parseUnits(`${Number(repayAmount)}`, decimals ?? 18),
-      rateMode,
-    ],
-  })
+    isPending: isLoadingRepayATokensWrite,
+    writeContract: repayWithATokensWrite,
+  } = useWritePoolRepayWithATokens()
 
   const {
     isLoading: isLoadingRepayATokensTx,
     isSuccess: isSuccessRepayATokensTx,
-  } = useWaitForTransaction({
-    hash: dataRepayATokens?.hash,
+  } = useWaitForTransactionReceipt({
+    hash: dataRepayATokens,
   })
 
-  const { write: swapBorrowRateModeWrite } = usePoolSwapBorrowRateMode({
-    address: poolAddress,
-    args: [address, rateMode],
-  })
+  const { writeContract: swapBorrowRateModeWrite } =
+    useWritePoolSwapBorrowRateMode()
 
   const getRepayBalance = () =>
     repayWithATokens ? aTokenBalance : tokenBalance
@@ -153,12 +131,33 @@ export const BorrowedAssetsItem = ({
       Number(formatUnits(allowance ?? BigInt(1), decimals ?? 18)) <
       Number(repayAmount)
     ) {
-      approveWrite()
+      approveWrite({
+        address,
+        args: [
+          poolAddress,
+          parseUnits(`${Number(repayAmount)}`, decimals ?? 18),
+        ],
+      })
     } else {
       if (repayWithATokens) {
-        repayWithATokensWrite()
+        repayWithATokensWrite({
+          address: poolAddress,
+          args: [
+            address,
+            parseUnits(`${Number(repayAmount)}`, decimals ?? 18),
+            rateMode,
+          ],
+        })
       } else {
-        repayWrite()
+        repayWrite({
+          address: poolAddress,
+          args: [
+            address,
+            parseUnits(`${Number(repayAmount)}`, decimals ?? 18),
+            rateMode,
+            user as `0x${string}`,
+          ],
+        })
       }
     }
   }
@@ -208,7 +207,12 @@ export const BorrowedAssetsItem = ({
         <Select
           disabled={!canSwitchRateMode}
           value={rateMode.toString()}
-          onValueChange={() => swapBorrowRateModeWrite()}
+          onValueChange={() =>
+            swapBorrowRateModeWrite({
+              address: poolAddress,
+              args: [address, rateMode],
+            })
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder="Select market" />

@@ -27,7 +27,7 @@ export function RenameTask({
     mode: "all",
   })
 
-  const { mutateAsync: renameTask, isLoading } = useRenameTask()
+  const { mutateAsync: renameTask, isPending } = useRenameTask()
 
   const onSubmit = async () => {
     const { name } = form.getValues()
@@ -64,10 +64,10 @@ export function RenameTask({
             <Button
               variant="blue"
               className="rounded-full px-5"
-              disabled={isLoading}
+              disabled={isPending}
               type="submit"
             >
-              {isLoading ? <FaSpinner className="animate-spin" /> : <>Save</>}
+              {isPending ? <FaSpinner className="animate-spin" /> : <>Save</>}
             </Button>
           </div>
           <ValidationError error={form.formState.errors.name?.message} />

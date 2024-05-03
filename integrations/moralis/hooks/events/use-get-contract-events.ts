@@ -20,7 +20,8 @@ export function useGetContractEvents({
   enabled,
 }: GetContractEventsArgs) {
   console
-  return useQuery(["get-contract-events", chain, address, topic, abi], {
+  return useQuery({
+    queryKey: ["get-contract-events", chain, address, topic, abi],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/events/getContractEvents`,
@@ -55,7 +56,8 @@ export function useGetContractEventsRaw({
   abi,
   enabled,
 }: GetContractEventsArgs) {
-  return useQuery(["get-contract-events-raw", chain, address, topic, abi], {
+  return useQuery({
+    queryKey: ["get-contract-events-raw", chain, address, topic, abi],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/events/getContractEvents`,

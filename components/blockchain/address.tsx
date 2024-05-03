@@ -1,5 +1,6 @@
 import { HTMLAttributes } from "react"
-import { useNetwork, type Address as AddressType } from "wagmi"
+import { type Address as AddressType } from "viem"
+import { useAccount } from "wagmi"
 
 import { LinkComponent } from "../shared/link-component"
 
@@ -16,7 +17,7 @@ export const Address = ({
   isLink,
   ...props
 }: AddressProps) => {
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
   const blockExplorerUrl = chain?.blockExplorers?.default.url
   const formattedAddress = truncate
     ? `${address.slice(0, 6)}...${address.slice(-4)}`

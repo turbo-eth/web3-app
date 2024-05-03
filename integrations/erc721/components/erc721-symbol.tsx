@@ -1,4 +1,4 @@
-import { useErc721Symbol } from "../generated/erc721-wagmi"
+import { useReadErc721Symbol } from "../generated/erc721-wagmi"
 import { ERC721Props } from "../utils/types"
 
 export function ERC721Symbol({
@@ -7,7 +7,7 @@ export function ERC721Symbol({
   className,
   ...props
 }: ERC721Props) {
-  const { data } = useErc721Symbol({
+  const { data } = useReadErc721Symbol({
     address,
     chainId,
   })

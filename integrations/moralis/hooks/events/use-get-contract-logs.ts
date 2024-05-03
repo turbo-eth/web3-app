@@ -15,7 +15,8 @@ export function useGetContractLogs({
   address,
   enabled,
 }: GetContractLogsArgs) {
-  return useQuery(["get-contract-logs", chain, address], {
+  return useQuery({
+    queryKey: ["get-contract-logs", chain, address],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/events/getContractLogs`,
@@ -46,7 +47,8 @@ export function useGetContractLogsRaw({
   address,
   enabled,
 }: GetContractLogsArgs) {
-  return useQuery(["get-contract-logs-raw", chain, address], {
+  return useQuery({
+    queryKey: ["get-contract-logs-raw", chain, address],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/events/getContractLogs`,

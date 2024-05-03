@@ -1,1 +1,0 @@
-export const MINIMUM_DEPOSIT_AMOUNT = 2

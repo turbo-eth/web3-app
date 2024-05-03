@@ -1,6 +1,6 @@
 import { useCallback } from "react"
 import { atom, SetStateAction, useAtom, WritableAtom } from "jotai"
-import type { Address } from "wagmi"
+import type { Address } from "viem"
 
 type TokenType = Address | undefined
 

@@ -33,8 +33,8 @@ export const useXcall = ({
 }: XCallArgs): IXCall => {
   const { address } = useAccount()
 
-  const { data, isLoading } = useQuery<TransactionRequest, Error>(
-    [
+  const { data, isLoading } = useQuery<TransactionRequest, Error>({
+    queryKey: [
       "xcall",
       isMainnet,
       origin,
@@ -45,33 +45,31 @@ export const useXcall = ({
       relayerFee,
       address,
     ],
-    {
-      queryFn: async () => {
-        const response = await axios.post<AxiosResponseData>(
-          `/api/connext/xcall`,
-          {
-            environment: isMainnet ? "mainnet" : "testnet",
-            origin,
-            destination,
-            to,
-            asset,
-            amount,
-            signer: address,
-            relayerFee,
-            slippage: "300",
-          }
-        )
-        return response.data.txRequest
-      },
-      enabled:
-        !!origin &&
-        !!destination &&
-        !!to &&
-        !!asset &&
-        !!amount &&
-        relayerFee !== "0",
-    }
-  )
+    queryFn: async () => {
+      const response = await axios.post<AxiosResponseData>(
+        `/api/connext/xcall`,
+        {
+          environment: isMainnet ? "mainnet" : "testnet",
+          origin,
+          destination,
+          to,
+          asset,
+          amount,
+          signer: address,
+          relayerFee,
+          slippage: "300",
+        }
+      )
+      return response.data.txRequest
+    },
+    enabled:
+      !!origin &&
+      !!destination &&
+      !!to &&
+      !!asset &&
+      !!amount &&
+      relayerFee !== "0",
+  })
 
   return { request: data, isLoading }
 }

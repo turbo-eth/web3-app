@@ -23,7 +23,8 @@ export const useSearchChannels = ({
   page,
   limit,
 }: UseSearchChannelProps) => {
-  return useQuery(["search-channels", query, env, page, limit], {
+  return useQuery({
+    queryKey: ["search-channels", query, env, page, limit],
     queryFn: () => searchChannels({ query, env, page, limit }),
     refetchOnWindowFocus: false,
   })

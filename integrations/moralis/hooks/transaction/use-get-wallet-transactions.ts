@@ -15,7 +15,8 @@ export function useGetWalletTransactions({
   address,
   enabled,
 }: GetWalletTransactionsArgs) {
-  return useQuery(["get-wallet-transactions", chain, address], {
+  return useQuery({
+    queryKey: ["get-wallet-transactions", chain, address],
     queryFn: async (): Promise<GetWalletTransactionsResponse | undefined> => {
       const res = await fetch(
         `/integration/moralis/api/transaction/getWalletTransactions?chain=${chain}&address=${address}&format=result`
@@ -36,7 +37,8 @@ export function useGetWalletTransactionsRaw({
   address,
   enabled,
 }: GetWalletTransactionsArgs) {
-  return useQuery(["get-wallet-transactions-raw", chain, address], {
+  return useQuery({
+    queryKey: ["get-wallet-transactions-raw", chain, address],
     queryFn: async () => {
       const res = await fetch(
         `/integration/moralis/api/transaction/getWalletTransactions?chain=${chain}&address=${address}&format=raw`
